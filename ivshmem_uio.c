@@ -15,6 +15,17 @@
 
 #include <asm/io.h>
 
+#define NONO
+
+#ifdef NONO
+#include <linux/kthread.h>
+#include <asm/set_memory.h>
+
+#if 0
+static struct task_struct *k;
+#endif // 0
+#endif
+
 #define IntrStatus 0x04
 #define IntrMask 0x00
 
@@ -123,6 +134,58 @@ error:
 
 }
 
+#ifdef NONO
+// from driver/uio/uio.c                                                        
+static const struct vm_operations_struct uio_physical_vm_ops = {
+#ifdef CONFIG_HAVE_IOREMAP_PROT
+	.access = generic_access_phys,
+#endif
+};
+
+// for IDS
+static int ivshmem_mmap(struct uio_info *info, struct vm_area_struct *vma)
+{
+    size_t vma_size;
+    int ret;
+
+    if (info->mem[1].addr & ~PAGE_MASK)
+        return -ENODEV;
+
+    vma_size = vma->vm_end - vma->vm_start;
+    if (vma_size > info->mem[1].size)
+        return -EINVAL;
+
+    vma->vm_ops = &uio_physical_vm_ops;
+    vma->vm_page_prot = pgprot_noncached(vma->vm_page_prot);
+
+    ret = remap_pfn_range(vma, vma->vm_start,
+                          info->mem[1].addr >> PAGE_SHIFT,
+                          vma_size, vma->vm_page_prot);
+    if (ret < 0)
+        return ret;
+
+    if (IS_ENABLED(CONFIG_AMD_MEM_ENCRYPT)) {
+        //set_process_memory_decrypted(vma->vm_start, vma_size >> PAGE_SHIFT);
+        printk("SEV: decrypt shared memory\n");
+    }
+
+    return 0;
+}
+
+#if 0
+// for server
+static int kthread_func(void *arg)
+{
+    char *shmem = (char *)arg;
+    
+    printk("shmem: %p\n", shmem);
+    printk("%s\n", shmem);
+
+    return 0;
+}
+#endif // 0
+#endif /* NONO */
+
 static int ivshmem_pci_probe(struct pci_dev *dev,
 					const struct pci_device_id *id)
 {
@@ -162,13 +225,13 @@ static int ivshmem_pci_probe(struct pci_dev *dev,
 	if (!info->mem[1].addr)
 		goto out_unmap;
 
-    info->mem[1].internal_addr = ioremap_cache(pci_resource_start(dev, 2),
+	info->mem[1].internal_addr = ioremap_cache(pci_resource_start(dev, 2),
 				     pci_resource_len(dev, 2));
 	if (!info->mem[1].internal_addr)
 		goto out_unmap;
 
 #if 0
-    info->mem[1].internal_addr = pci_ioremap_bar(dev, 2);
+	info->mem[1].internal_addr = pci_ioremap_bar(dev, 2);
 	if (!info->mem[1].internal_addr)
 		goto out_unmap;
 #endif
@@ -193,6 +256,16 @@ static int ivshmem_pci_probe(struct pci_dev *dev,
 	info->name = "ivshmem";
 	info->version = "0.0.1";
 
+#ifdef NONO
+	info->mmap = ivshmem_mmap;
+
+#if 0
+        // memory mapped by ioremap is not encrypted by SEV
+        k = kthread_run(kthread_func, info->mem[1].internal_addr,
+                        "ivshmem kthread");
+#endif // 0
+#endif
+        
 	if (uio_register_device(&dev->dev, info))
 		goto out_unmap2;
 
@@ -201,7 +274,7 @@ static int ivshmem_pci_probe(struct pci_dev *dev,
 
 	return 0;
 out_unmap2:
-	iounmap(info->mem[2].internal_addr);
+	iounmap(info->mem[1].internal_addr);
 out_unmap:
 	iounmap(info->mem[0].internal_addr);
 out_release:
