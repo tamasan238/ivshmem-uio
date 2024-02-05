@@ -1,4 +1,4 @@
-all: read_shm write_shm read_on_hv
+all: read_shm write_shm write_shm_pass write_shm_drop read_on_hv
 
 read_shm: read_shm.c
 	gcc -o $@ $<
