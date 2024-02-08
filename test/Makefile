@@ -1,4 +1,4 @@
-all: read_shm write_shm write_shm_pass write_shm_drop read_on_hv
+all: read_shm write_shm pass drop read_on_hv
 
 read_shm: read_shm.c
 	gcc -o $@ $<
@@ -6,10 +6,10 @@ read_shm: read_shm.c
 write_shm: write_shm.c
 	gcc -o $@ $<
 
-write_shm_pass: write_shm_pass.c
+pass: pass.c
 	gcc -o $@ $<
 
-write_shm_drop: write_shm_drop.c
+drop: drop.c
 	gcc -o $@ $<
 
 read_on_hv: ivshmem_mmap.c
