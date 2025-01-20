@@ -17,16 +17,8 @@ int main(){
     }
 
     printf("fd: %d，SHM_SIZE: %d\n", fd, SHM_SIZE);
-    
-    int offset;
-    printf("offset を選択してください (0 または 4096): ");
-    if (scanf("%d", &offset) != 1 || (offset != 0 && offset != 4096)) {
-        fprintf(stderr, "invalid value\n");
-        close(fd);
-        exit(EXIT_FAILURE);
-    }
 
-    void *shm_ptr = mmap(NULL, SHM_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, offset);
+    void *shm_ptr = mmap(NULL, SHM_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 4096);
     if (shm_ptr == MAP_FAILED) {
         perror("mmap");
     	close(fd);
