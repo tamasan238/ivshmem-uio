@@ -1,4 +1,4 @@
-#define SHM_NAME "/dev/uio0"
+#define SHM_NAME "/dev/shm/ivshmem"
 #define SHM_SIZE 524288 // 512 * 1024
 
 #include <stdio.h>
