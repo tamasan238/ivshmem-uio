@@ -18,7 +18,7 @@ int main(){
 
     printf("fd: %d，SHM_SIZE: %d\n", fd, SHM_SIZE);
 
-    void *shm_ptr = mmap(NULL, SHM_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 4096);
+    void *shm_ptr = mmap(NULL, SHM_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (shm_ptr == MAP_FAILED) {
         perror("mmap");
     	close(fd);
@@ -38,7 +38,9 @@ int main(){
     }
 
     if (choice == 1) {
-        printf("メモリの最初のデータ: %s\n", (char *)shm_ptr);
+        printf("メモリの最初のデータ: %lu\n", *(unsigned long *)shm_ptr);
+        printf("メモリの最初のデータ: %lu\n", *((unsigned long *)shm_ptr+1));
+        printf("メモリの最初のデータ: %lu\n", 4096* *((unsigned long *)shm_ptr+1));
     } else if (choice == 2) {
         memcpy(shm_ptr, "host", strlen("host") + 1);
         printf("メモリの最初のデータ: %s\n", (char *)shm_ptr);
