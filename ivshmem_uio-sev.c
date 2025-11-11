@@ -17,7 +17,7 @@
 
 #define NONO
 
-int set_process_memory_decrypted(unsigned long addr, int numpages);
+// int set_process_memory_decrypted(unsigned long addr, int numpages); // for SVSM
 int set_memory_decrypted(unsigned long addr, int numpages);
 #ifdef NONO
 #include <linux/kthread.h>
@@ -189,7 +189,8 @@ static int ivshmem_mmap(struct uio_info *info, struct vm_area_struct *vma)
     if (IS_ENABLED(CONFIG_AMD_MEM_ENCRYPT)) {
 	printk("PAGE_SHIFT : %d\n", PAGE_SHIFT);
 	printk("vma_size >> PAGE_SHIFT : %ld\n", vma_size >> PAGE_SHIFT);
-        set_process_memory_decrypted(vma->vm_start, vma_size >> PAGE_SHIFT);
+        // set_process_memory_decrypted(vma->vm_start, vma_size >> PAGE_SHIFT); // for SVSM
+		set_memory_decrypted(vma->vm_start, vma_size >> PAGE_SHIFT);
         printk("SEV: decrypt shared memory\n");
     }
 
