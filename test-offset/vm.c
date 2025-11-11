@@ -23,9 +23,14 @@ int main() {
     }
 
     unsigned long *ptr = (unsigned long *)shm_ptr;
-    printf("1ページ目: %lu\n", ptr[0]);
-    printf("2ページ目: %lu\n", ptr[PAGE_SIZE / sizeof(unsigned long)]);
-    printf("3ページ目: %lu\n", ptr[2 * (PAGE_SIZE / sizeof(unsigned long))]);
+
+    for (int page = 0; page < 3; page++) {
+        printf("%dページ目: ", page + 1);
+        for (int i = 0; i < 256; i++) {
+            printf("%lu ", ptr[page * (PAGE_SIZE / sizeof(unsigned long)) + i]);
+        }
+        printf("\n");
+    }
 
     munmap(shm_ptr, SHM_SIZE);
     close(fd);

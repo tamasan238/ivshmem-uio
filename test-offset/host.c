@@ -1,5 +1,5 @@
 #define SHM_NAME "/dev/shm/ivshmem"
-#define SHM_SIZE 524288 // 512 * 1024
+#define SHM_SIZE 524288
 #define PAGE_SIZE 4096
 
 #include <stdio.h>
@@ -7,9 +7,8 @@
 #include <sys/mman.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include <string.h>
 
-int main(){
+int main() {
     int fd = open(SHM_NAME, O_RDWR);
     if (fd < 0) {
         perror("open");
@@ -24,13 +23,20 @@ int main(){
     }
 
     unsigned long *ptr = (unsigned long *)shm_ptr;
-    ptr[0] = 1;
-    ptr[PAGE_SIZE / sizeof(unsigned long)] = 2;
-    ptr[2 * (PAGE_SIZE / sizeof(unsigned long))] = 3;
 
-    printf("1ページ目: %lu\n", ptr[0]);
-    printf("2ページ目: %lu\n", ptr[PAGE_SIZE / sizeof(unsigned long)]);
-    printf("3ページ目: %lu\n", ptr[2 * (PAGE_SIZE / sizeof(unsigned long))]);
+    for (int page = 0; page < 3; page++) {
+        for (int i = 0; i < 256; i++) {
+            ptr[page * (PAGE_SIZE / sizeof(unsigned long)) + i] = i + 1;
+        }
+    }
+
+    for (int page = 0; page < 3; page++) {
+        printf("%dページ目: ", page + 1);
+        for (int i = 0; i < 256; i++) {
+            printf("%lu ", ptr[page * (PAGE_SIZE / sizeof(unsigned long)) + i]);
+        }
+        printf("\n");
+    }
 
     munmap(shm_ptr, SHM_SIZE);
     close(fd);
