@@ -1,5 +1,5 @@
 #define SHM_NAME "/dev/uio0"
-#define SHM_SIZE 1048576
+#define SHM_SIZE 524288
 #define PAGE_SIZE 4096
 
 #include <stdio.h>
