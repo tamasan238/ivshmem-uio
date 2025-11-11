@@ -23,9 +23,13 @@ int main() {
     }
 
     unsigned long *ptr = (unsigned long *)shm_ptr;
+    unsigned long offset = 0;
 
-    for (int i = 0; i < 512; i++) {
-        printf("ページ %d: %lu\n", i + 1, ptr[i * (PAGE_SIZE / sizeof(unsigned long))]);
+    for(int j = 0; j<512; j++){
+        for (int i = 0; i < 5; i++) {
+            printf("%lu", ptr[offset+i * (PAGE_SIZE / sizeof(unsigned long))]);
+        }
+        offset++;
     }
 
     munmap(shm_ptr, SHM_SIZE);
