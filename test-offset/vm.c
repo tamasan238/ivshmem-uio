@@ -27,7 +27,7 @@ int main() {
 
     for(int j = 0; j<512; j++){
         for (int i = 0; i < 5; i++) {
-            printf("%lu", ptr[offset+i * (PAGE_SIZE / sizeof(unsigned long))]);
+            printf("%lu ", ptr[offset+i * (PAGE_SIZE / sizeof(unsigned long))]);
         }
         puts("");
         offset++;
