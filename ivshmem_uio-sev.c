@@ -247,7 +247,9 @@ static int ivshmem_pci_probe(struct pci_dev *dev,
 	if (!info->mem[1].addr)
 		goto out_unmap;
 
-	info->mem[1].internal_addr = ioremap_cache(pci_resource_start(dev, 2),
+	// info->mem[1].internal_addr = ioremap_cache(pci_resource_start(dev, 2),
+				    //  pci_resource_len(dev, 2));
+	info->mem[1].internal_addr = ioremap_nocache(pci_resource_start(dev, 2),
 				     pci_resource_len(dev, 2));
 	printk(KERN_INFO "shmem_len : 0x%llx\n", pci_resource_len(dev, 2));
 	if (!info->mem[1].internal_addr)
