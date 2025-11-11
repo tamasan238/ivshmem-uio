@@ -1,5 +1,6 @@
 #define SHM_NAME "/dev/uio0"
 #define SHM_SIZE 524288
+#define PAGE_SIZE 4096
 
 #include <stdio.h>
 #include <fcntl.h>
@@ -21,13 +22,10 @@ int main() {
         exit(EXIT_FAILURE);
     }
 
-    int *ptr0 = (int *)shm_ptr;
-    int *ptr1 = (int *)((char *)shm_ptr + 4096);
-    int *ptr2 = (int *)((char *)shm_ptr + 4096 * 2);
-
-    printf("先頭の数値: %d\n", *ptr0);
-    printf("1ページ先の数値: %d\n", *ptr1);
-    printf("2ページ先の数値: %d\n", *ptr2);
+    unsigned long *ptr = (unsigned long *)shm_ptr;
+    printf("1ページ目: %lu\n", ptr[0]);
+    printf("2ページ目: %lu\n", ptr[PAGE_SIZE / sizeof(unsigned long)]);
+    printf("3ページ目: %lu\n", ptr[2 * (PAGE_SIZE / sizeof(unsigned long))]);
 
     munmap(shm_ptr, SHM_SIZE);
     close(fd);
