@@ -1,8 +1,17 @@
+SEV_ENABLED := $(shell sudo dmesg | grep -iq 'AMD Memory Encryption Features active: SEV' && echo 1 || echo 0)
+
+ifeq ($(SEV_ENABLED),1)
+SRC := ivshmem_uio-sev.c
+else
+SRC := ivshmem_uio.c
+endif
+
 # obj-m is a list of what kernel modules to build.  The .o and other
 # objects will be automatically built from the corresponding .c file -
 # no need to list the source files explicitly.
 
-obj-m := ivshmem_uio.o 
+obj-m := ivshmem_uio.o
+ivshmem_uio-objs := $(SRC:.c=.o)
 
 # KDIR is the location of the kernel source.  The current standard is
 # to link to the associated source tree from the directory containing
