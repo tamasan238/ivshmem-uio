@@ -25,7 +25,7 @@ int main() {
     unsigned long *ptr = (unsigned long *)shm_ptr;
     unsigned long offset = 0;
 
-    for(int j = 0; j<512+1024; j++){
+    for(int j = 0; j<512*1024; j++){
         for (int i = 0; i < 5; i++) {
             printf("%lu ", ptr[offset+i * (PAGE_SIZE / sizeof(unsigned long))]);
         }
