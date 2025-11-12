@@ -1,19 +1,34 @@
-DMESG_OUTPUT := $(shell dmesg | grep -iq 'AMD Memory Encryption Features active: SEV' && echo 1 || echo 0)
+# DMESG_OUTPUT := $(shell dmesg | grep -iq 'AMD Memory Encryption Features active: SEV' && echo 1 || echo 0)
 
-ifeq ($(DMESG_OUTPUT),1)
-SRC := ivshmem_uio-sev.c
-else
-SRC := ivshmem_uio.c
-endif
+# ifeq ($(DMESG_OUTPUT),1)
+# SRC := ivshmem_uio-sev.c
+# else
+# SRC := ivshmem_uio.c
+# endif
 
-ivshmem_uio-objs := $(SRC:.c=.o)
-obj-m := ivshmem_uio.o
+# obj-m is a list of what kernel modules to build.  The .o and other
+# objects will be automatically built from the corresponding .c file -
+# no need to list the source files explicitly.
 
+obj-m := ivshmem_uio.o 
+
+# KDIR is the location of the kernel source.  The current standard is
+# to link to the associated source tree from the directory containing
+# the compiled modules.
 KDIR  := /lib/modules/$(shell uname -r)/build
+
+# PWD is the current working directory and the location of our module
+# source files.
 PWD   := $(shell pwd)
 
+# default is the default make target.  The rule here says to run make
+# with a working directory of the directory containing the kernel
+# source and compile only the modules in the PWD (local) directory.
 default:
 	$(MAKE) -C $(KDIR) M=$(PWD) modules
+
+install:
+	cp uio_ivshmem.ko /lib/modules/$(shell uname -r)/kernel/drivers/uio/
 
 clean:
 	rm -f *.ko *.o ivshmem_uio.mod.c Module.symvers
