@@ -156,7 +156,10 @@ static int ivshmem_mmap(struct uio_info *info, struct vm_area_struct *vma)
 
     vma->vm_ops = &uio_physical_vm_ops;
 	// vma->vm_flags |= VM_IO | VM_PFNMAP | VM_DONTEXPAND | VM_DONTDUMP;
-    vma->vm_page_prot = pgprot_noncached(vma->vm_page_prot);
+    // vma->vm_page_prot = pgprot_noncached(vma->vm_page_prot);
+	vma->vm_page_prot = pgprot_writeback(vma->vm_page_prot);
+
+	
 
 	pr_emerg("ivshmem_mmap: info->mem[1].addr=0x%llx size=0x%llx vma_start=0x%lx vma_end=0x%lx vma_pgoff=0x%lx\n",
         info->mem[1].addr, info->mem[1].size, vma->vm_start, vma->vm_end, vma->vm_pgoff);
