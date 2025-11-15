@@ -15,11 +15,9 @@
 
 #include <asm/io.h>
 
-#include <asm/pgtable.h>
+// #include <asm/pgtable.h>
 
-#ifdef CONFIG_AMD_MEM_ENCRYPT
-int set_process_memory_decrypted(unsigned long addr, int numpages);
-#endif
+// int set_process_memory_decrypted(unsigned long addr, int numpages);
 
 #define NONO
 
@@ -162,10 +160,7 @@ static int ivshmem_mmap(struct uio_info *info, struct vm_area_struct *vma)
         return -EINVAL;
 
     vma->vm_ops = &uio_physical_vm_ops;
-	if (!IS_ENABLED(CONFIG_AMD_MEM_ENCRYPT)) {
-    	vma->vm_page_prot = pgprot_noncached(vma->vm_page_prot);
-		// SEV適用時のみコメントアウト
-	}
+	vma->vm_page_prot = pgprot_noncached(vma->vm_page_prot);
 
     ret = remap_pfn_range(vma, vma->vm_start,
                           info->mem[1].addr >> PAGE_SHIFT,
@@ -173,12 +168,10 @@ static int ivshmem_mmap(struct uio_info *info, struct vm_area_struct *vma)
     if (ret < 0)
         return ret;
 
-#ifdef CONFIG_AMD_MEM_ENCRYPT
-    if (IS_ENABLED(CONFIG_AMD_MEM_ENCRYPT)) {
-        set_process_memory_decrypted(vma->vm_start, vma_size >> PAGE_SHIFT);
-        printk("SEV: decrypt shared memory\n");
-    }
-#endif
+    // if (IS_ENABLED(CONFIG_AMD_MEM_ENCRYPT)) {
+    //     set_process_memory_decrypted(vma->vm_start, vma_size >> PAGE_SHIFT);
+    //     printk("SEV: decrypt shared memory\n");
+    // }
 
     return 0;
 }
