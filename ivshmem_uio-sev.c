@@ -154,11 +154,10 @@ static int ivshmem_mmap(struct uio_info *info, struct vm_area_struct *vma)
     if (vma_size > info->mem[1].size)
         return -EINVAL;
 
+	vma->vm_flags |= VM_IO | VM_PFNMAP | VM_DONTEXPAND | VM_DONTDUMP;
     vma->vm_ops = &uio_physical_vm_ops;
-    // vma->vm_page_prot = pgprot_noncached(vma->vm_page_prot);
-	vma->vm_page_prot = pgprot_writecombine(vma->vm_page_prot);
-
-	// vma->vm_flags |= VM_IO | VM_PFNMAP | VM_DONTEXPAND | VM_DONTDUMP;
+    vma->vm_page_prot = pgprot_noncached(vma->vm_page_prot);
+	// vma->vm_page_prot = pgprot_writecombine(vma->vm_page_prot);
 
 
       ret = remap_pfn_range(vma, vma->vm_start,
