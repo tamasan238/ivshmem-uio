@@ -3,7 +3,7 @@
 # ifeq ($(DMESG_OUTPUT),1)
 # SRC := ivshmem_uio-sev.c
 # else
-# SRC := ivshmem_uio.c
+SRC := ivshmem_uio.c
 # endif
 
 # obj-m is a list of what kernel modules to build.  The .o and other
