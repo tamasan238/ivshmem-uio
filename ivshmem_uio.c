@@ -16,6 +16,7 @@
 #include <asm/io.h>
 
 #include <asm/pgtable.h>
+
 int set_process_memory_decrypted(unsigned long addr, int numpages);
 
 #define NONO
@@ -170,10 +171,12 @@ static int ivshmem_mmap(struct uio_info *info, struct vm_area_struct *vma)
     if (ret < 0)
         return ret;
 
+#ifdef CONFIG_AMD_MEM_ENCRYPT
     if (IS_ENABLED(CONFIG_AMD_MEM_ENCRYPT)) {
         set_process_memory_decrypted(vma->vm_start, vma_size >> PAGE_SHIFT);
         printk("SEV: decrypt shared memory\n");
     }
+#endif
 
     return 0;
 }
