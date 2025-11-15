@@ -158,7 +158,7 @@ static int ivshmem_mmap(struct uio_info *info, struct vm_area_struct *vma)
     vma->vm_page_prot = pgprot_noncached(vma->vm_page_prot);
 
       ret = remap_pfn_range(vma, vma->vm_start,
-        info->mem[1].addr >> PAGE_SHIFT,
+        info->mem[1].addr >> PAGE_SHIFT + vma->vm_pgoff,
         vma_size, vma->vm_page_prot);
     if (ret < 0)
         return ret;
