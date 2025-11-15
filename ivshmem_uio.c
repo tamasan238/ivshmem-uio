@@ -17,7 +17,9 @@
 
 #include <asm/pgtable.h>
 
+#ifdef CONFIG_AMD_MEM_ENCRYPT
 int set_process_memory_decrypted(unsigned long addr, int numpages);
+#endif
 
 #define NONO
 
