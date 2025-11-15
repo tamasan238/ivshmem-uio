@@ -144,7 +144,6 @@ static const struct vm_operations_struct uio_physical_vm_ops = {
 // for IDS
 static int ivshmem_mmap(struct uio_info *info, struct vm_area_struct *vma)
 {
-    static int mapping_flag = 0;
     size_t vma_size;
     int ret;
 
@@ -152,42 +151,19 @@ static int ivshmem_mmap(struct uio_info *info, struct vm_area_struct *vma)
         return -ENODEV;
 
     vma_size = vma->vm_end - vma->vm_start;
-    printk("vma_size : %lx\n", vma_size);
-    printk("info->mem[1].size : %llx\n", info->mem[1].size);
     if (vma_size > info->mem[1].size)
         return -EINVAL;
 
     vma->vm_ops = &uio_physical_vm_ops;
     vma->vm_page_prot = pgprot_noncached(vma->vm_page_prot);
 
-    /*
-    printk("vma->vm_start : %lx\n", vma->vm_start);
-    printk("vma->vm_end : %lx\n", vma->vm_end);
-    printk("vma->vm_ops : %p\n", vma->vm_ops);
-    printk("vma->vm_page_prot : %lx\n", vma->vm_page_prot.pgprot);
-    */
-    
-    
-    /* if(mapping_flag) {
-    printk(KERN_INFO "mapping_flag");
-    ret = remap_pfn_range(vma, vma->vm_start,
-		    (info->mem[1].addr >> PAGE_SHIFT)+1,
-		    vma_size, vma->vm_page_prot);
-    mapping_flag = 0;
-    } else {
-    */
-      printk(KERN_INFO "!mapping_flag");
       ret = remap_pfn_range(vma, vma->vm_start,
         info->mem[1].addr >> PAGE_SHIFT,
         vma_size, vma->vm_page_prot);
-      mapping_flag = 1;
-    // }
     if (ret < 0)
         return ret;
 
     if (IS_ENABLED(CONFIG_AMD_MEM_ENCRYPT)) {
-	printk("PAGE_SHIFT : %d\n", PAGE_SHIFT);
-	printk("vma_size >> PAGE_SHIFT : %ld\n", vma_size >> PAGE_SHIFT);
         set_process_memory_decrypted(vma->vm_start, vma_size >> PAGE_SHIFT);
         printk("SEV: decrypt shared memory\n");
     }
@@ -195,15 +171,6 @@ static int ivshmem_mmap(struct uio_info *info, struct vm_area_struct *vma)
     return 0;
 }
 
-// for server
-static int my_kthread_func(void *arg)
-{
-    char *shmem = (char *)arg;
-    
-    printk("shmem: %p\n", shmem);
-
-    return 0;
-}
 #endif /* NONO */
 
 static int ivshmem_pci_probe(struct pci_dev *dev,
@@ -245,13 +212,8 @@ static int ivshmem_pci_probe(struct pci_dev *dev,
 	if (!info->mem[1].addr)
 		goto out_unmap;
 
-	// info->mem[1].internal_addr = ioremap_cache(pci_resource_start(dev, 2),
-				    //  pci_resource_len(dev, 2));
-	// info->mem[1].internal_addr = ioremap_nocache(pci_resource_start(dev, 2),
-	// 			     pci_resource_len(dev, 2));
-	info->mem[1].internal_addr = ioremap(pci_resource_start(dev, 2),
+	info->mem[1].internal_addr = ioremap_cache(pci_resource_start(dev, 2),
                                      pci_resource_len(dev, 2));
-	printk(KERN_INFO "shmem_len : 0x%llx\n", pci_resource_len(dev, 2));
 	if (!info->mem[1].internal_addr)
 		goto out_unmap;
 
@@ -262,7 +224,6 @@ static int ivshmem_pci_probe(struct pci_dev *dev,
 #endif
 
 	info->mem[1].size = pci_resource_len(dev, 2);
-	printk("pci_resource_len(dev, 2) : 0x%llx\n", info->mem[1].size);
 	info->mem[1].memtype = UIO_MEM_PHYS;
 
 	ivshmem_info->uio = info;
@@ -284,10 +245,6 @@ static int ivshmem_pci_probe(struct pci_dev *dev,
 
 #ifdef NONO
 	info->mmap = ivshmem_mmap;
-
-        // memory mapped by ioremap is not encrypted by SEV
-        k = kthread_run(my_kthread_func, info->mem[1].internal_addr,
-                        "ivshmem kthread");
 #endif
         
 	if (uio_register_device(&dev->dev, info))
