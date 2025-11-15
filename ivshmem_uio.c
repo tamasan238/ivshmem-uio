@@ -159,7 +159,10 @@ static int ivshmem_mmap(struct uio_info *info, struct vm_area_struct *vma)
         return -EINVAL;
 
     vma->vm_ops = &uio_physical_vm_ops;
-    // vma->vm_page_prot = pgprot_noncached(vma->vm_page_prot);
+	if (!IS_ENABLED(CONFIG_AMD_MEM_ENCRYPT)) {
+    	vma->vm_page_prot = pgprot_noncached(vma->vm_page_prot);
+		// SEV適用時のみコメントアウト
+	}
 
     ret = remap_pfn_range(vma, vma->vm_start,
                           info->mem[1].addr >> PAGE_SHIFT,
