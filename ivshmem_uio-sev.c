@@ -174,7 +174,7 @@ static int ivshmem_mmap(struct uio_info *info, struct vm_area_struct *vma)
         return ret;
 
     if (IS_ENABLED(CONFIG_AMD_MEM_ENCRYPT)) {
-        set_process_memory_decrypted(vma->vm_start, vma_size >> PAGE_SHIFT);
+        // set_process_memory_decrypted(vma->vm_start, vma_size >> PAGE_SHIFT);
 		// set_process_memory_decrypted(vma->vm_start, vma_size >> PAGE_SHIFT + vma->vm_pgoff);
         printk("SEV: decrypt shared memory\n");
     }
